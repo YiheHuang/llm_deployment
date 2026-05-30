@@ -1,0 +1,192 @@
+\documentclass[12pt,a4paper]{ctexart}
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{setspace}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  keywordstyle=\color{blue},
+  commentstyle=\color{teal},
+  stringstyle=\color{magenta}
+}
+
+\title{\heiti 人工智能导论第三次作业\\大语言模型部署体验实验报告}
+\author{姓名：黄一和 \quad 学号：2351269}
+\date{提交日期：2026年\underline{\hspace{1.0cm}}月\underline{\hspace{1.0cm}}日}
+
+\begin{document}
+
+\begin{titlepage}
+  \centering
+  \vspace*{2.5cm}
+  {\zihao{1}\heiti 人工智能导论}\\[1.2cm]
+  {\zihao{2}\heiti 第三次课程作业报告}\\[0.8cm]
+  {\zihao{3}\heiti 大语言模型部署体验}\\[3cm]
+  {\zihao{4}
+  姓名：黄一和\\[0.8cm]
+  学号：2351269\\[0.8cm]
+  }
+  \vfill
+  {\zihao{4}同济大学\\[0.3cm]
+  2026年5月}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{实验目的}
+本实验基于 ModelScope 平台完成大语言模型的部署体验，重点包括：
+\begin{enumerate}
+  \item 在云端 CPU 环境中完成模型部署与推理运行；
+  \item 对不同模型在相同问题集合上的输出质量与推理效率进行横向对比；
+  \item 整理实验过程与结果，形成可复现实验报告与项目材料。
+\end{enumerate}
+
+\section{实验环境}
+\subsection{平台与资源}
+\begin{itemize}
+  \item 平台：ModelScope
+  \item 计算资源：免费 CPU 云实例
+  \item 持久化存储：/mnt/workspace
+\end{itemize}
+
+\subsection{软件与参数}
+\begin{itemize}
+  \item Python：3.11（平台环境）
+  \item 核心库：PyTorch(CPU)、Transformers、ModelScope 等
+  \item 测试脚本参数：\texttt{max\_new\_tokens=80, temperature=0.2, top\_p=0.8}
+\end{itemize}
+
+\section{实验过程}
+\subsection{账号与算力准备}
+完成 ModelScope 账号注册、阿里云账号绑定与 CPU 资源启动。
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{images/账户首页+绑定阿里云.png}
+  \caption{ModelScope 账户主页与阿里云绑定状态}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{images/cpu环境启动.png}
+  \caption{CPU 云环境启动成功}
+\end{figure}
+
+\subsection{依赖安装与模型下载}
+在终端安装依赖并完成模型仓库克隆，部署了两个模型用于正式对比测试：
+\begin{itemize}
+  \item Qwen-7B-Chat
+  \item ChatGLM3-6B
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{images/pipinstall所有依赖.png}
+  \caption{依赖安装过程}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{images/gitclone完成.png}
+  \caption{模型仓库克隆完成}
+\end{figure}
+
+\subsection{统一评测脚本运行}
+使用统一脚本对两模型进行同题同参数测试，输出保存为：
+\begin{itemize}
+  \item \texttt{results/results\_20260530\_212226.json}
+  \item \texttt{results/results\_20260530\_212226.md}
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\textwidth]{images/运行脚本做对比实验.png}
+  \caption{对比测试脚本运行过程}
+\end{figure}
+
+\section{实验结果}
+\subsection{测试题集}
+共 6 道题，覆盖歧义句理解、指代消解、语义区分与基础知识表达等场景。
+
+\subsection{结果概览}
+\begin{table}[H]
+  \centering
+  \caption{两模型耗时统计（单位：秒）}
+  \begin{tabular}{lccc}
+    \toprule
+    模型 & 平均耗时 & 最短耗时 & 最长耗时 \\
+    \midrule
+    Qwen-7B-Chat & 140.79 & 44.21 & 184.87 \\
+    ChatGLM3-6B & 484.77 & 230.40 & 752.56 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{输出质量定性对比}
+  \begin{tabular}{p{2.8cm}p{5.2cm}p{5.2cm}}
+    \toprule
+    维度 & Qwen-7B-Chat & ChatGLM3-6B \\
+    \midrule
+    指令跟随 & 大部分题目可按要求作答，但个别题目出现截断或异常输出（如 Q5） & 指令跟随较稳定，回答结构相对完整 \\
+    歧义语句解析 & 对部分歧义题有一定理解，但在复杂语义题上稳定性一般 & 在多义词解释题（Q5）中表现更完整 \\
+    逻辑一致性 & 个别题目出现偏离问题语境（如 Q3 生成对话片段） & 总体逻辑连贯性更好，但也有概念泛化倾向 \\
+    推理速度（CPU） & 明显更快，平均约 140.79s/题 & 明显更慢，平均约 484.77s/题 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{典型现象分析}
+\begin{enumerate}
+  \item 在资源受限（CPU）条件下，两个 6B/7B 级模型均可运行，但推理时延明显偏高。
+  \item Qwen-7B-Chat 速度优势明显，适合对响应速度要求更高的场景。
+  \item ChatGLM3-6B 在部分复杂语言理解任务中回答更完整，但耗时成本较高。
+  \item 对多义词密集样本（如“意思”）仍可见模型不稳定性，后续可通过提示词优化与多轮验证缓解。
+\end{enumerate}
+
+\section{结论}
+本次实验完成了基于 ModelScope 的大语言模型部署体验，并成功实现了两模型在统一题集下的横向测试。实验结果表明：
+\begin{enumerate}
+  \item 在 CPU 环境中可完成部署与推理，但时延较高；
+  \item Qwen-7B-Chat 在本实验中速度更优；
+  \item ChatGLM3-6B 在部分语言理解题上的回答完整度更高；
+  \item 模型输出质量与速度存在显著权衡，应根据实际应用场景进行模型选择。
+\end{enumerate}
+
+\section{项目公开链接}
+本项目已公开发布在 GitHub，链接如下：
+
+\vspace{0.3cm}
+\noindent\textbf{公开链接：}\url{https://github.com/YiheHuang/llm_deployment}
+
+\appendix
+\section{附录A：评测脚本}
+脚本文件：\texttt{run\_eval.py}
+
+\lstinputlisting[language=Python]{scripts/run_eval.py}
+
+\section{附录B：原始结果文件（Markdown原文）}
+文件：\texttt{results/results\_20260530\_212226.md}
+
+\lstinputlisting{results/results_20260530_212226.md}
+
+\end{document}
